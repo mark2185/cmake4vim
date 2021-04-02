@@ -37,6 +37,10 @@ function! cmake4vim#CompleteBuildType(arg_lead, cmd_line, cursor_pos) abort
     return join( sort( keys( utils#cmake#getCMakeVariants() ), 'i' ), "\n")
 endfunction
 
+function! cmake4vim#CompleteKit(arg_lead, cmd_line, cursor_pos) abort
+    return join(sort(keys(g:cmake_kits), 'i'), "\n")
+endfunction
+
 " Method remove build directory and reset the cmake cache
 function! cmake4vim#ResetCMakeCache() abort
     let l:build_dir = utils#cmake#findBuildDir()
@@ -180,6 +184,44 @@ function! cmake4vim#SelectBuildType(buildType) abort
 
     call cmake4vim#GenerateCMake()
 endfunction
+
+function! cmake4vim#SelectKit(name) abort
+    if !has_key( g:cmake_kits, a:name )
+        echom printf("CMake kit '%s' not found", a:name)
+        return
+    endif
+
+    let g:cmake_selected_kit = a:name
+    let l:selected_kit       = g:cmake_kits[a:name]
+
+    " Reset everything
+    let g:cmake_toolchain_file = ''
+    let g:cmake_c_compiler     = ''
+    let g:cmake_cxx_compiler   = ''
+
+    " toolchainFile has higher priority
+    if has_key( l:selected_kit, 'toolchain_file')
+        let g:cmake_toolchain_file = l:selected_kit['toolchain_file']
+    else
+        let g:cmake_c_compiler     = g:cmake_kits[a:name]['compilers']['cmake_c_compiler']
+        let g:cmake_cxx_compiler   = g:cmake_kits[a:name]['compilers']['cmake_cxx_compiler']
+    endif
+
+    if has_key( l:selected_kit, 'cmake_usr_args' )
+        let l:args = []
+        for [key, val] in items( l:selected_kit['cmake_usr_args'] )
+            let l:args += [ printf("-D%s=%s", key, val ) ]
+        endfor
+        let g:cmake_usr_args .= ' ' . join( l:args )
+    endif
+
+    if has_key( l:selected_kit, 'environment_variables' )
+        for [key, val] in items( l:selected_kit['environment_variables'] )
+            execute 'let $' . key . '="' . val . '"'
+        endfor
+    endif
+endfunction
+
 
 function! cmake4vim#RunTarget(bang, ...) abort
     if !exists('g:cmake_build_target') || g:cmake_build_target ==# ''

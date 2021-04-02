@@ -146,6 +146,10 @@ function! utils#cmake#getCMakeGenerationCommand(...) abort
     if g:cmake_install_prefix !=# ''
         let l:cmake_args += ['-DCMAKE_INSTALL_PREFIX=' . g:cmake_install_prefix]
     endif
+    " Set toolchain file
+    if g:cmake_toolchain_file !=# ''
+        let l:cmake_args += ['-DCMAKE_TOOLCHAIN_FILE=' . g:cmake_toolchain_file]
+    endif
     " Set c and c++ compilers
     if g:cmake_c_compiler !=# ''
         let l:cmake_args += ['-DCMAKE_C_COMPILER=' . g:cmake_c_compiler]
