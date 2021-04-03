@@ -82,6 +82,27 @@ Plugin supports special global variables which are allow to change behaviour of 
  - **`g:cmake_build_executor`** allows to force set the build executor. Available values are 'job', 'dispatch', 'system' and ''. Default is empty.
  - **`g:cmake_vimspector_support`** enables generation and modification of [Vimspector](https://github.com/puremourning/vimspector) config file. Default is 0. **Attention! The support of Vimspector config is an experimental feature.**
  - **`g:cmake_variants`** enables predefined cmake build variants in the form of a dictionary, e.g. `{ 'Debug' : { 'cmake_build_type' : 'Debug', 'cmake_usr_args' : '-DCONAN_PATH=~/.conan' } }`
+ - **`g:cmake_kits`** enables predefined cmake kits in the form of a dictionary of dictionaries that specify a toolchain file, environment variables, cmake variables among other things
+ - **`g:cmake_selected_kit`** currently selected cmake kit. Default is empty.
+ - **`g:cmake_toolchain_file`** currently selected toolchain file. Default is empty.
+ - **`g:cmake_build_path_pattern`** pattern for build dir, two strings that will be evaluated in a `printf` and used instead of `g:cmake_build_dir_prefix`, e.g.:
+     `let g:cmake_build_path_pattern = [ "%s/workspace/build/%s/%s/%s", "$HOME, split( $PWD, '/' )[-1], g:cmake_selected_kit, g:cmake_build_type" ]`
+
+Example of supported functions in `g:cmake_kits`:
+```
+let g:cmake_kits = {
+            \  "emscripten-2.0.15": {
+            \    "toolchain_file": "~/.conan/data/emsdk_installer/2.0.15/microblink/stable/package/743cf0321be3152777da4d05247a66d1552e70a2/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake",
+            \    "environment_variables": {
+            \      "EM_CONFIG": "/Users/mark/.conan/data/emsdk_installer/2.0.15/microblink/stable/package/743cf0321be3152777da4d05247a66d1552e70a2/.emscripten",
+            \      "EM_CACHE": "/Users/mark/.conan/data/emsdk_installer/2.0.15/microblink/stable/package/743cf0321be3152777da4d05247a66d1552e70a2/.emscripten_cache"
+            \    },
+            \    "cmake_usr_args": {
+            \      "MB_EMSCRIPTEN_EMRUN_BROWSER": "chrome",
+            \      "MB_EMSCRIPTEN_EMRUN_SILENCE_TIMEOUT": "300"
+            \    }
+            \  } }
+```
 
 
 ### **Jump to**

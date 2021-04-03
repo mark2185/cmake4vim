@@ -44,6 +44,10 @@ function! s:detectCMakeBuildDir() abort
         return l:cmake_info['cmake']['build_dir']
     endif
     let l:build_type = s:detectCMakeBuildType()
+    if len( g:cmake_build_path_pattern ) == 2
+        let [ l:fmt, l:args ] = g:cmake_build_path_pattern
+        return eval( printf('printf("%s", %s)', l:fmt, l:args ) )
+    endif
     return g:cmake_build_dir_prefix . l:build_type
 endfunction
 
@@ -162,7 +166,7 @@ function! utils#cmake#getCMakeGenerationCommand(...) abort
         let l:cmake_args += ['-DCMAKE_EXPORT_COMPILE_COMMANDS=ON']
     endif
     " Add user arguments
-    let l:cmake_args += [l:cmake_variant['cmake_usr_args']]
+    let l:cmake_args += [g:cmake_usr_args]
 
     " Generates the command line
     let l:cmake_cmd = 'cmake ' . join(l:cmake_args) . ' ' . join(a:000)

@@ -203,8 +203,8 @@ function! cmake4vim#SelectKit(name) abort
     if has_key( l:selected_kit, 'toolchain_file')
         let g:cmake_toolchain_file = l:selected_kit['toolchain_file']
     else
-        let g:cmake_c_compiler     = g:cmake_kits[a:name]['compilers']['cmake_c_compiler']
-        let g:cmake_cxx_compiler   = g:cmake_kits[a:name]['compilers']['cmake_cxx_compiler']
+        let g:cmake_c_compiler     = g:cmake_kits[a:name]['compilers']['C']
+        let g:cmake_cxx_compiler   = g:cmake_kits[a:name]['compilers']['CXX']
     endif
 
     if has_key( l:selected_kit, 'cmake_usr_args' )
