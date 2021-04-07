@@ -136,6 +136,10 @@ function! cmake4vim#SelectTarget(target) abort
     endif
     let l:cmake_target = utils#cmake#setBuildTarget(l:build_dir, a:target)
     let l:cmd = utils#cmake#getBuildCommand(l:build_dir, l:cmake_target)
+    if g:cmake_vimspector_support
+        let l:conf = utils#config#vimspector#getTargetConfig(l:cmake_target)
+        let g:cmake_run_target_args = l:conf['args'][0]
+    endif
     if g:cmake_change_build_command
         let &makeprg = l:cmd
     endif
