@@ -220,6 +220,10 @@ function! cmake4vim#SelectKit(name) abort
             execute 'let $' . key . '="' . val . '"'
         endfor
     endif
+
+    if has_key( l:selected_kit, 'generator' )
+        let g:cmake_project_generator = l:selected_kit['generator']
+    endif
 endfunction
 
 

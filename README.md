@@ -86,23 +86,33 @@ Plugin supports special global variables which are allow to change behaviour of 
  - **`g:cmake_selected_kit`** currently selected cmake kit. Default is empty.
  - **`g:cmake_toolchain_file`** currently selected toolchain file. Default is empty.
  - **`g:cmake_build_path_pattern`** pattern for build dir, two strings that will be evaluated in a `printf` and used instead of `g:cmake_build_dir_prefix`, e.g.:
-     `let g:cmake_build_path_pattern = [ "%s/workspace/build/%s/%s/%s", "$HOME, split( $PWD, '/' )[-1], g:cmake_selected_kit, g:cmake_build_type" ]`
+     `let g:cmake_build_path_pattern = [ "%s/workspace/build/%s/%s/%s", "$HOME, fnamemodify( getcwd(), ':t' ), g:cmake_selected_kit, g:cmake_build_type" ]`
 
 Example of supported functions in `g:cmake_kits`:
 ```
 let g:cmake_kits = {
             \  "emscripten-2.0.15": {
-            \    "toolchain_file": "~/.conan/data/emsdk_installer/2.0.15/microblink/stable/package/743cf0321be3152777da4d05247a66d1552e70a2/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake",
+            \    "toolchain_file": "~/toolchains/Emscripten.cmake",
             \    "environment_variables": {
-            \      "EM_CONFIG": "/Users/mark/.conan/data/emsdk_installer/2.0.15/microblink/stable/package/743cf0321be3152777da4d05247a66d1552e70a2/.emscripten",
-            \      "EM_CACHE": "/Users/mark/.conan/data/emsdk_installer/2.0.15/microblink/stable/package/743cf0321be3152777da4d05247a66d1552e70a2/.emscripten_cache"
+            \      "EM_CONFIG": "/Users/vimmer/configs/.emscripten",
+            \      "EM_CACHE": "/Users/vimmer/caches/.emscripten_cache"
             \    },
             \    "cmake_usr_args": {
             \      "MB_EMSCRIPTEN_EMRUN_BROWSER": "chrome",
             \      "MB_EMSCRIPTEN_EMRUN_SILENCE_TIMEOUT": "300"
-            \    }
+            \    },
+            \    "generator": "Ninja"
+            \  } }
+let g:cmake_kits = {
+            \  "emscripten-2.0.15": {
+            \    "compilers": {
+            \        "C": "/usr/bin/gcc",
+            \        "CXX": "/usr/bin/g++"
             \  } }
 ```
+
+If you specify both `toolchain_file` and `compilers`, the `toolchain_file` takes precedence and `compilers` are ignored.
+
 
 
 ### **Jump to**
