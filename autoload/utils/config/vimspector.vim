@@ -59,7 +59,7 @@ function! s:createNewTarget() abort
     let l:configuration['request'] = 'launch'
     let l:configuration['cwd'] = '${workspaceRoot}'
     let l:configuration['Mimode'] = ''
-    let l:configuration['args'] = []
+    let l:configuration['args'] = [g:cmake_run_target_args]
     let l:configuration['program'] = ''
 
     let l:config = {}
@@ -116,7 +116,7 @@ function! utils#config#vimspector#updateConfig(config) abort
 endfunction
 
 function! utils#config#vimspector#getTargetConfig(target) abort
-    let l:result = {'app': '', 'args': []}
+    let l:result = {'app': '', 'args': [g:cmake_run_target_args]}
     if filereadable(s:getVimspectorConfig())
         let l:config = utils#config#vimspector#updateConfig({})
         if !empty(l:config)
