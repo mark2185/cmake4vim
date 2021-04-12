@@ -76,12 +76,43 @@ Plugin supports special global variables which are allow to change behaviour of 
  - **`g:cmake_build_type`** allows to change **`-DCMAKE_BUILD_TYPE`**. Default is empty. If variable is empty, plugin tries to detect cached build type. And selects 'Release' type if cmake cache doesn't exist.
  - **`g:cmake_c_compiler`** allows to change **`-DCMAKE_C_COMPILER`**. Default is empty.
  - **`g:cmake_cxx_compiler`** allows to change **`-DCMAKE_CXX_COMPILER`**. Default is empty.
- - **`g:cmake_usr_args`** allows to set user arguments for cmake. Default is empty.
+ - **`g:cmake_usr_args`** allows to set user arguments for cmake. Default is empty. It can be either a string or a dictionary.
  - **`g:cmake_compile_commands`** if this variable is not equal 0, plugin will generate compile commands data base. Default is 0.
  - **`g:cmake_compile_commands_link`** set the path for a link on compile_commands.json. Default is empty.
  - **`g:cmake_build_executor`** allows to force set the build executor. Available values are 'job', 'dispatch', 'system' and ''. Default is empty.
  - **`g:cmake_vimspector_support`** enables generation and modification of [Vimspector](https://github.com/puremourning/vimspector) config file. Default is 0. **Attention! The support of Vimspector config is an experimental feature.**
- - **`g:cmake_variants`** enables predefined cmake build variants in the form of a dictionary, e.g. `{ 'Debug' : { 'cmake_build_type' : 'Debug', 'cmake_usr_args' : '-DCONAN_PATH=~/.conan' } }`
+ - **`g:cmake_variants`** enables predefined cmake build variants in the form of a dictionary, e.g. `{ 'Debug' : { 'cmake_build_type' : 'Debug', 'cmake_usr_args' : { 'CONAN_PATH' : '~/.conan' } }`
+ - **`g:cmake_kits`** enables predefined cmake kits in the form of a dictionary of dictionaries that specify a toolchain file, environment variables, cmake variables among other things
+ - **`g:cmake_selected_kit`** currently selected cmake kit. Default is empty.
+ - **`g:cmake_toolchain_file`** currently selected toolchain file. Default is empty.
+ - **`g:cmake_build_path_pattern`** pattern for build dir, two strings that will be evaluated in a `printf` and used instead of `g:cmake_build_dir_prefix`, e.g.:
+     `let g:cmake_build_path_pattern = [ "%s/workspace/build/%s/%s/%s", "$HOME, fnamemodify( getcwd(), ':t' ), g:cmake_selected_kit, g:cmake_build_type" ]`
+
+Example of supported functions in `g:cmake_kits`:
+```
+let g:cmake_kits = {
+            \  "emscripten-2.0.15": {
+            \    "toolchain_file": "~/toolchains/Emscripten.cmake",
+            \    "environment_variables": {
+            \      "EM_CONFIG": "/Users/vimmer/configs/.emscripten",
+            \      "EM_CACHE": "/Users/vimmer/caches/.emscripten_cache"
+            \    },
+            \    "cmake_usr_args": {
+            \      "MB_EMSCRIPTEN_EMRUN_BROWSER": "chrome",
+            \      "MB_EMSCRIPTEN_EMRUN_SILENCE_TIMEOUT": "300"
+            \    },
+            \    "generator": "Ninja"
+            \  } }
+let g:cmake_kits = {
+            \  "emscripten-2.0.15": {
+            \    "compilers": {
+            \        "C": "/usr/bin/gcc",
+            \        "CXX": "/usr/bin/g++"
+            \  } }
+```
+
+If you specify both `toolchain_file` and `compilers`, the `toolchain_file` takes precedence and `compilers` are ignored.
+
 
 
 ### **Jump to**
