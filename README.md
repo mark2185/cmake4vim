@@ -77,12 +77,12 @@ Plugin supports special global variables which are allow to change behaviour of 
  - **`g:cmake_build_type`** allows to change **`-DCMAKE_BUILD_TYPE`**. Default is empty. If variable is empty, plugin tries to detect cached build type. And selects 'Release' type if cmake cache doesn't exist.
  - **`g:cmake_c_compiler`** allows to change **`-DCMAKE_C_COMPILER`**. Default is empty.
  - **`g:cmake_cxx_compiler`** allows to change **`-DCMAKE_CXX_COMPILER`**. Default is empty.
- - **`g:cmake_usr_args`** allows to set user arguments for cmake. Default is empty.
+ - **`g:cmake_usr_args`** allows to set user arguments for cmake. Default is empty. It can be either a string or a dictionary.
  - **`g:cmake_compile_commands`** if this variable is not equal 0, plugin will generate compile commands data base. Default is 0.
  - **`g:cmake_compile_commands_link`** set the path for a link on compile_commands.json. Default is empty.
  - **`g:cmake_build_executor`** allows to force set the build executor. Available values are 'job', 'dispatch', 'system' and ''. Default is empty.
  - **`g:cmake_vimspector_support`** enables generation and modification of [Vimspector](https://github.com/puremourning/vimspector) config file. Default is 0. **Attention! The support of Vimspector config is an experimental feature.**
- - **`g:cmake_variants`** enables predefined cmake build variants in the form of a dictionary, e.g. `{ 'Debug' : { 'cmake_build_type' : 'Debug', 'cmake_usr_args' : '-DCONAN_PATH=~/.conan' } }`
+ - **`g:cmake_variants`** enables predefined cmake build variants in the form of a dictionary, e.g. `{ 'Debug' : { 'cmake_build_type' : 'Debug', 'cmake_usr_args' : { 'CONAN_PATH' : '~/.conan' } }`
  - **`g:cmake_kits`** enables predefined cmake kits in the form of a dictionary of dictionaries that specify a toolchain file, environment variables, cmake variables among other things
  - **`g:cmake_selected_kit`** currently selected cmake kit. Default is empty.
  - **`g:cmake_toolchain_file`** currently selected toolchain file. Default is empty.

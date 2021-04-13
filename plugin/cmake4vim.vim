@@ -64,10 +64,10 @@ if !exists('g:cmake_vimspector_support')
 endif
 
 let g:cmake_variants           = get( g:, 'cmake_variants'          , {} )
-let g:cmake_kits               = get( g:, 'cmake_kits'              , {} )
 let g:cmake_selected_kit       = get( g:, 'cmake_selected_kit'      , '' )
 let g:cmake_toolchain_file     = get( g:, 'cmake_toolchain_file'    , '' )
 let g:cmake_build_path_pattern = get( g:, 'cmake_build_path_pattern', '' )
+let g:cmake_kits               = get( g:, 'cmake_kits'              , {} )
 let g:cmake_run_target_args    = get( g:, 'cmake_run_target_args'   , '' )
 
 " Optional variable allow to specify the build executor
