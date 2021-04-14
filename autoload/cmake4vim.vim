@@ -158,9 +158,8 @@ function! cmake4vim#CompileCurrentSource() abort
         call utils#common#Warning('CMake project was not found!')
         return
     endif
-    let l:cmake_target = printf('CMakeFiles/%s.dir/%s.o', split(expand('%'), '/')[0], expand('%') )
     " Select target
-    let l:cmd = utils#cmake#getBuildCommand(l:build_dir, l:cmake_target)
+    let l:cmd = utils#cmake#getBuildCommand(l:build_dir, expand('%:p') . '^' )
     " Build
     call utils#common#executeCommand(l:cmd)
 endfunction
