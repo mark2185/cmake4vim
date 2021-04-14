@@ -89,4 +89,5 @@ command! CMakeReset call cmake4vim#ResetCMakeCache()
 command! CMakeClean call cmake4vim#CleanCMake()
 command! CMakeInfo call utils#window#OpenCMakeInfo()
 command! -bang -nargs=* CMakeRun call cmake4vim#RunTarget(<bang>0, <f-args>)
+command! -nargs=0 CMakeCompileSource call cmake4vim#CompileCurrentSource()
 " }}} Commands "

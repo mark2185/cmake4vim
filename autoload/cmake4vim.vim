@@ -147,6 +147,24 @@ function! cmake4vim#SelectTarget(target) abort
     return l:cmd
 endfunction
 
+" Builds current source
+function! cmake4vim#CompileCurrentSource() abort
+    if expand('%:e') !=# 'cpp'
+        call utils#common#Warning('Current file is not a source file!')
+        return
+    endif
+    let l:build_dir = utils#cmake#findBuildDir()
+    if l:build_dir ==# ''
+        call utils#common#Warning('CMake project was not found!')
+        return
+    endif
+    let l:cmake_target = printf('CMakeFiles/%s.dir/%s.o', split(expand('%'), '/')[0], expand('%') )
+    " Select target
+    let l:cmd = utils#cmake#getBuildCommand(l:build_dir, l:cmake_target)
+    " Build
+    call utils#common#executeCommand(l:cmd)
+endfunction
+
 " Builds CMake project
 function! cmake4vim#CMakeBuild(...) abort
     let l:build_dir = utils#cmake#findBuildDir()
