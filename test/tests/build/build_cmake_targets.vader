@@ -47,16 +47,7 @@ Before:
     let g:cmake_variants = {}
     let g:cmake_selected_kit = ''
     let g:cmake_toolchain_file = ''
-    let g:cmake_kits = {
-                \ "First":
-                \ {
-                \    "toolchain_file" : "android.toolchain.cmake",
-                \    "cmake_usr_args": { "ANDROID_STL": "c++_static", "ANDROID_TOOLCHAIN": "clang", "ANDROID_ABI": "arm64-v8a" },
-                \    "compilers": { "C": "clang", "CXX": "clang++" },
-                \    "generator": "Ninja",
-                \    "environment_variables" : { "MY_CUSTOM_VARIABLE" : "15", "MY_OTHER_CUSTOM_VARIABLE" : "YES" }
-                \},
-                \ "Second" : { "compilers" : { "C": "", "CXX": "" }, "cmake_usr_args" : { 'Flag' : 'ON' } } }
+    let g:cmake_kits = {}
     let g:cmake_build_path_pattern = []
     " Use on in order to close all windows and avoid E36 error
     silent on
@@ -82,8 +73,6 @@ Execute (Generate cmake project with default settings):
             Assert filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
             Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
         endif
-    else
-        echom 'SKIPPED'
     endif
 
 Execute (Generate cmake project with custom options):
@@ -105,8 +94,6 @@ Execute (Generate cmake project with custom options):
             silent call system("cmake-build-Release/app/Debug/test_app.exe")
             AssertEqual 1, v:shell_error
         endif
-    else
-        echom 'SKIPPED'
     endif
 
 Execute (Generate cmake project with custom options as argument):
@@ -127,8 +114,6 @@ Execute (Generate cmake project with custom options as argument):
             silent call system("cmake-build-Release/app/Debug/test_app.exe")
             AssertEqual 1, v:shell_error
         endif
-    else
-        echom 'SKIPPED'
     endif
 
 Execute (Check CMake generator):
@@ -145,8 +130,6 @@ Execute (Check CMake generator):
             AssertNotEqual stridx(cmake_gen, utils#gen#make#getGeneratorName()), -1, 'Cmake Generator '. cmake_gen
         endif
         echo cmake_gen
-    else
-        echom 'SKIPPED'
     endif
 
 Execute (Check CMakeClean):
@@ -171,8 +154,6 @@ Execute (Check CMakeClean):
             Assert !filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
             Assert !filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
         endif
-    else
-        echom 'SKIPPED'
     endif
 
 Execute (Build only library with arguments):
@@ -190,8 +171,6 @@ Execute (Build only library with arguments):
             Assert !filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
             Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
         endif
-    else
-        echom 'SKIPPED'
     endif
 
 Execute (CMakeBuild for test library):
@@ -210,8 +189,6 @@ Execute (CMakeBuild for test library):
             Assert !filereadable("cmake-build-Release/app/Debug/test_app.exe"), "app should be built"
             Assert filereadable("cmake-build-Release/lib/Debug/test_lib.lib"), "test_lib should be built"
         endif
-    else
-        echom 'SKIPPED'
     endif
 
 Execute (Check all targets):
@@ -221,8 +198,6 @@ Execute (Check all targets):
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
         let targets = cmake4vim#GetAllTargets()
         Assert len(targets) >= 5, "Number of targets: " . len(targets) . " List: " . join(targets, " ")
-    else
-        echom 'SKIPPED'
     endif
 
 Execute (Get cmake targets):
@@ -233,8 +208,31 @@ Execute (Get cmake targets):
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
         let targets = split(cmake4vim#CompleteTarget(0,0,0), "\n")
         Assert len(targets) >= 5, "Number of targets: " . len(targets) . " List: " . join(targets, " ")
-    else
-        echom 'SKIPPED'
+    endif
+
+Execute (Check cmake_usr_args conversion from string to dictionary):
+    if !has('win32')
+        let cmake_usr_args = '-DMY_CUSTOM_OP=ON -DCOMPILER_PATH=this/is/a/compiler/path -DMOUNT_PATH=./mount/disk15'
+        let split_args = utils#cmake#splitUserArgs( cmake_usr_args )
+        AssertEqual sort( items( split_args ) ), [ ['COMPILER_PATH', 'this/is/a/compiler/path'], ['MOUNT_PATH', './mount/disk15' ], ['MY_CUSTOM_OP', 'ON'] ]
+    endif
+
+Execute (Check cmake_usr_args conversion from dictionary to string):
+    if !has('win32')
+        let cmake_usr_args = {'MY_CUSTOM_OP' : 'ON', 'COMPILER_PATH' : 'this/is/a/compiler/path', 'MOUNT_PATH' : './mount/disk15' }
+        let joined_args = utils#cmake#joinUserArgs( cmake_usr_args )
+        Assert joined_args =~# '-DMY_CUSTOM_OP=ON'
+        Assert joined_args =~# '-DCOMPILER_PATH=this/is/a/compiler/path'
+        Assert joined_args =~# '-DMOUNT_PATH=./mount/disk15'
+    endif
+
+Execute (Check cmake_usr_args conversion from string to dictionary to string):
+    if !has('win32')
+        let cmake_usr_args = '-DMY_CUSTOM_OP=ON -DCOMPILER_PATH=this/is/a/compiler/path -DMOUNT_PATH=./mount/disk15'
+        let new_cmake_usr_args = utils#cmake#joinUserArgs( utils#cmake#splitUserArgs( cmake_usr_args ) )
+        Assert new_cmake_usr_args =~# '-DMY_CUSTOM_OP=ON'
+        Assert new_cmake_usr_args =~# '-DCOMPILER_PATH=this/is/a/compiler/path'
+        Assert new_cmake_usr_args =~# '-DMOUNT_PATH=./mount/disk15'
     endif
 
 Execute (Check cmake_usr_args conversion from string to dictionary):
@@ -278,8 +276,6 @@ Execute (Get custom build types):
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
         let result = split(cmake4vim#CompleteBuildType(0,0,0), "\n")
         AssertEqual len(result), 5
-    else
-        echom 'SKIPPED'
     endif
 
 Execute (Override default build types):
@@ -292,8 +288,6 @@ Execute (Override default build types):
         let result = split(cmake4vim#CompleteBuildType(0,0,0), "\n")
         AssertEqual len(result), 4
         AssertEqual g:cmake_variants[ 'Debug' ][ 'cmake_usr_args' ], {'CUSTOM_OP':'ON'}
-    else
-        echom 'SKIPPED'
     endif
 
 Execute (Store g:cmake_usr_args with default build types):
@@ -308,8 +302,6 @@ Execute (Store g:cmake_usr_args with default build types):
         for build_type in keys( g:cmake_variants )
             AssertEqual g:cmake_variants[ build_type ][ 'cmake_usr_args' ], {'CUSTOM_OP':'ON'}
         endfor
-    else
-        echom 'SKIPPED'
     endif
 
 Execute (Only default build types have default values):
@@ -325,8 +317,6 @@ Execute (Only default build types have default values):
             AssertEqual g:cmake_variants[ build_type ][ 'cmake_usr_args' ], {'DEFAULT_OP':'ON'}
         endfor
         AssertEqual g:cmake_variants[ 'custom-build' ][ 'cmake_usr_args' ], {'CUSTOM_OP':'ON'}
-    else
-        echom 'SKIPPED'
     endif
 
 Execute (Get default build types):
@@ -337,8 +327,6 @@ Execute (Get default build types):
         Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
         let result = split(cmake4vim#CompleteBuildType(0,0,0), "\n")
         AssertEqual len(result), 4
-    else
-        echom 'SKIPPED'
     endif
 
 Execute (Check all targets for empty project):
@@ -347,8 +335,6 @@ Execute (Check all targets for empty project):
         Assert !filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should not be generated"
         let targets = cmake4vim#GetAllTargets()
         AssertEqual len(targets), 0
-    else
-        echom 'SKIPPED'
     endif
 
 Execute (Select all targets for empty project):
@@ -358,8 +344,6 @@ Execute (Select all targets for empty project):
         let cmd = cmake4vim#SelectTarget('all')
         AssertEqual cmd, ''
         Assert !filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should not be generated"
-    else
-        echom 'SKIPPED'
     endif
 
 Execute (Call CMakeBuild for empty project):
@@ -368,8 +352,6 @@ Execute (Call CMakeBuild for empty project):
         Assert !filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should not be generated"
         silent CMakeBuild
         Assert !filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should not be generated"
-    else
-        echom 'SKIPPED'
     endif
 
 Execute (Check CMakeClean for empty project):
@@ -378,179 +360,4 @@ Execute (Check CMakeClean for empty project):
         Assert !isdirectory("cmake-build-Release"), "Build directory should not exist"
         CMakeClean
         Assert !isdirectory("cmake-build-Release"), "Build directory should not exist"
-    else
-        echom 'SKIPPED'
-    endif
-
-Execute (Check CMakeKit autocomplete):
-    if !has('win32')
-        let kits = split(cmake4vim#CompleteKit(0,0,0))
-        AssertEqual len(kits), 2
-        AssertEqual kits, [ "First", "Second" ]
-        let g:cmake_kits[ "Third" ] = { "toolchain_file" : "random_third.txt" }
-        let kits = split(cmake4vim#CompleteKit(0,0,0))
-        AssertEqual len(kits), 3
-        AssertEqual kits, [ "First", "Second", "Third" ]
-    else
-        echom 'SKIPPED'
-    endif
-
-Execute (Check CMakeKit toolchain file):
-    if !has('win32')
-        Assert !isdirectory("cmake-build-Release"), "Build directory should not exist"
-        silent CMakeSelectKit First
-        silent CMake
-        Assert isdirectory("cmake-build-Release"), "Build directory should exist"
-        let generation_command = utils#cmake#getCMakeGenerationCommand()
-        Assert generation_command =~# '-DCMAKE_TOOLCHAIN_FILE=android.toolchain.cmake'
-    else
-        echom 'SKIPPED'
-    endif
-
-Execute (Check toolchain file precedence over compilers):
-    if !has('win32')
-        Assert !isdirectory("cmake-build-Release"), "Build directory should not exist"
-        silent CMakeSelectKit First
-        silent CMake
-        Assert isdirectory("cmake-build-Release"), "Build directory should exist"
-        let generation_command = utils#cmake#getCMakeGenerationCommand()
-        Assert generation_command =~# '-DCMAKE_TOOLCHAIN_FILE=android.toolchain.cmake'
-        Assert generation_command !~# '-DCMAKE_C_COMPILER'
-        Assert generation_command !~# '-DCMAKE_CXX_COMPILER'
-    else
-        echom 'SKIPPED'
-    endif
-
-Execute (Check CMakeKit compilers setting):
-    if !has('win32')
-        silent call remove( g:cmake_kits["First"], "toolchain_file" )
-        Assert !isdirectory("cmake-build-Release"), "Build directory should not exist"
-        silent CMakeSelectKit First
-        silent CMake
-        Assert isdirectory("cmake-build-Release"), "Build directory should exist"
-        let generation_command = utils#cmake#getCMakeGenerationCommand()
-        Assert generation_command =~# '-DCMAKE_C_COMPILER=clang'
-        Assert generation_command =~# '-DCMAKE_CXX_COMPILER=clang++'
-    else
-        echom 'SKIPPED'
-    endif
-
-Execute (Check CMakeKit generator setting):
-    if !has('win32')
-        silent call remove( g:cmake_kits["First"], "toolchain_file" )
-        Assert !isdirectory('cmake-build-Release'), 'Build directory should not exist'
-        silent CMakeSelectKit First
-        silent CMake
-        Assert isdirectory('cmake-build-Release'), 'Build directory should exist'
-        Assert filereadable('cmake-build-Release/build.ninja'), 'build.ninja should exist'
-
-        let g:cmake_kits['First']['generator'] = ''
-        silent call RemoveDirectory('cmake-build-Release')
-        Assert !isdirectory('cmake-build-Release'), 'Build directory should not exist'
-        silent CMakeSelectKit First
-        silent CMake
-        Assert isdirectory('cmake-build-Release'), 'Build directory should exist'
-        Assert filereadable('cmake-build-Release/Makefile'), 'Makefile should exist'
-    else
-        echom 'SKIPPED'
-    endif
-
-Execute (Check CMakeKit cmake_usr_args setting):
-    if !has('win32')
-        Assert !isdirectory('cmake-build-Release'), 'Build directory should not exist'
-        silent CMakeSelectKit First
-        silent CMake
-        Assert isdirectory('cmake-build-Release'), 'Build directory should exist'
-        Assert filereadable('cmake-build-Release/CMakeCache.txt'), 'CMakeCache.txt should be generated'
-        let generation_command = utils#cmake#getCMakeGenerationCommand()
-        Assert generation_command =~# '-DANDROID_STL=c++_static'
-        Assert generation_command =~# '-DANDROID_TOOLCHAIN=clang'
-        Assert generation_command =~# '-DANDROID_ABI=arm64-v8a'
-    else
-        echom 'SKIPPED'
-    endif
-
-Execute (Check CMakeKit environment variables):
-    if !has('win32')
-        Assert !isdirectory('cmake-build-Release'), 'Build directory should not exist'
-        silent CMakeSelectKit First
-        silent CMakeSelectBuildType Release
-        Assert isdirectory('cmake-build-Release'), 'Build directory should exist'
-        AssertEqual $MY_CUSTOM_VARIABLE, '15'
-        AssertEqual $MY_OTHER_CUSTOM_VARIABLE, 'YES'
-        unlet $MY_CUSTOM_VARIABLE
-        unlet $MY_OTHER_CUSTOM_VARIABLE
-    else
-        echom 'SKIPPED'
-    endif
-
-Execute (Check CMakeKit change kit unset environment variables):
-    if !has('win32')
-        Assert !isdirectory('cmake-build-Release'), 'Build directory should not exist'
-        silent CMakeSelectKit First
-        silent CMake
-        Assert isdirectory('cmake-build-Release'), 'Build directory should exist'
-        AssertEqual $MY_CUSTOM_VARIABLE, '15'
-        AssertEqual $MY_OTHER_CUSTOM_VARIABLE, 'YES'
-        silent CMakeSelectKit Second
-        silent CMake
-        Assert !exists('$MY_CUSTOM_VARIABLE')
-        Assert !exists('$MY_OTHER_CUSTOM_VARIABLE')
-    else
-        echom 'SKIPPED'
-    endif
-
-Execute (Check CMakeKit default):
-    if !has('win32')
-        Assert !isdirectory('cmake-build-Release'), 'Build directory should not exist'
-        silent CMakeSelectKit First
-        silent CMakeSelectBuildType Release
-        Assert isdirectory('cmake-build-Release'), 'Build directory should exist'
-        AssertEqual $MY_CUSTOM_VARIABLE, '15'
-        AssertEqual $MY_OTHER_CUSTOM_VARIABLE, 'YES'
-        unlet $MY_CUSTOM_VARIABLE
-        unlet $MY_OTHER_CUSTOM_VARIABLE
-    else
-        echom 'SKIPPED'
-    endif
-
-Execute (Check CMakeKit selected kit without CMakeSelectKit):
-    if !has('win32')
-        Assert !isdirectory('cmake-build-Release'), 'Build directory should not exist'
-        let g:cmake_selected_kit = 'Second'
-        silent CMake
-        Assert isdirectory('cmake-build-Release'), 'Build directory should exist'
-        let generation_command = utils#cmake#getCMakeGenerationCommand()
-        Assert generation_command =~# '-DFlag=ON'
-    else
-        echom 'SKIPPED'
-    endif
-
-Execute (Check build path pattern):
-    if !has('win32')
-        let g:cmake_build_path_pattern = [ "./custom-build-name/%s/%s", "g:cmake_selected_kit, g:cmake_build_type" ]
-        Assert !isdirectory('custom-build-name/First/Release'), 'Build directory should not exist'
-        silent CMakeSelectKit First
-        silent CMake
-        AssertEqual g:cmake_selected_kit, 'First'
-        silent CMakeSelectBuildType Release
-        Assert isdirectory('custom-build-name/First/Release'), 'Build directory should exist'
-        silent call RemoveDirectory('custom-build-name')
-    else
-        echom 'SKIPPED'
-    endif
-
-Execute (Check build path pattern precedence over build_dir_prefix):
-    if !has('win32')
-        let g:cmake_build_path_pattern = [ "./custom-build-name/%s/%s", "g:cmake_selected_kit, g:cmake_build_type" ]
-        let g:cmake_build_dir_prefix = 'my-custom-prefix'
-        Assert !isdirectory('custom-build-name/First/Release'), 'Build directory should not exist'
-        Assert !isdirectory('my-custom-prefixRelease'), 'Build directory should not exist'
-        silent CMakeSelectKit First
-        silent CMakeSelectBuildType Release
-        Assert isdirectory('custom-build-name/First/Release'), 'Build directory should exist'
-        Assert !isdirectory('my-custom-prefixRelease'), 'Build directory should not exist'
-        silent call RemoveDirectory('custom-build-name')
-    else
-        echom 'SKIPPED'
     endif

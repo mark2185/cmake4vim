@@ -90,24 +90,30 @@ Plugin supports special global variables which are allow to change behaviour of 
  - **`g:cmake_build_path_pattern`** pattern for build dir, two strings that will be evaluated in a `printf` and used instead of `g:cmake_build_dir_prefix`, e.g.:
      `let g:cmake_build_path_pattern = [ "%s/workspace/build/%s/%s/%s", "$HOME, fnamemodify( getcwd(), ':t' ), g:cmake_selected_kit, g:cmake_build_type" ]`
  - **`g:cmake_ctest_args`** enables arguments for `ctest`, e.g. `'-j8 --output-on-failure --verbose'`. Default is empty. If the user calls `:CTest <some arguments>`, the `g:cmake_ctest_args` are inserted directly after `ctest`, before the `<some arguments>` parameter.
+ - **`g:cmake_variants`** enables predefined cmake build variants in the form of a dictionary, e.g. `{ 'Debug' : { 'cmake_build_type' : 'Debug', 'cmake_usr_args' : { 'CONAN_PATH' : '~/.conan' } }`
+ - **`g:cmake_kits`** enables predefined cmake kits in the form of a dictionary of dictionaries that specify a toolchain file, environment variables, cmake variables among other things
+ - **`g:cmake_selected_kit`** currently selected cmake kit. Default is empty.
+ - **`g:cmake_toolchain_file`** currently selected toolchain file. Default is empty.
+ - **`g:cmake_build_path_pattern`** pattern for build dir, two strings that will be evaluated in a `printf`. e.g.:
+     `let g:cmake_build_path_pattern = [ "%s/workspace/build/%s/%s/%s", "$HOME, fnamemodify( getcwd(), ':t' ), g:cmake_selected_kit, g:cmake_build_type" ]`, **Note:** it takes precedence over `g:cmake_build_dir_prefix`
 
 Example of supported functions in `g:cmake_kits`:
 ```
 let g:cmake_kits = {
-            \  "emscripten-2.0.15": {
-            \    "toolchain_file": "~/toolchains/Emscripten.cmake",
+            \  "android-ndk-r22": {
+            \    "toolchain_file": "~/toolchains/android.cmake",
             \    "environment_variables": {
-            \      "EM_CONFIG": "/Users/vimmer/configs/.emscripten",
-            \      "EM_CACHE": "/Users/vimmer/caches/.emscripten_cache"
+            \      "PATH_TO_CACHE": "/Users/vimmer/cache",
+            \      "PATH_TO_CONFIG": "/Users/vimmer/config"
             \    },
             \    "cmake_usr_args": {
-            \      "MB_EMSCRIPTEN_EMRUN_BROWSER": "chrome",
-            \      "MB_EMSCRIPTEN_EMRUN_SILENCE_TIMEOUT": "300"
+            \      "USE_BROWSER": "chrome",
+            \      "TIMEOUT_IN_SECONDS": "300"
             \    },
             \    "generator": "Ninja"
             \  } }
 let g:cmake_kits = {
-            \  "emscripten-2.0.15": {
+            \  "gcc": {
             \    "compilers": {
             \        "C": "/usr/bin/gcc",
             \        "CXX": "/usr/bin/g++"
@@ -115,8 +121,6 @@ let g:cmake_kits = {
 ```
 
 If you specify both `toolchain_file` and `compilers`, the `toolchain_file` takes precedence and `compilers` are ignored.
-
-
 
 ### **Jump to**
 
@@ -140,6 +144,60 @@ Plugin is closely integrated with quickfix list and allows to use quickfix featu
 
 Bug reports, feedback, feature and other pull requests are appreciated. Check the [Contributing Guidelines](CONTRIBUTING.md) for how to
 create a feature request, submit a pull request or post an issue.
+
+## **Tips and tricks**
+
+### ccmake
+
+If you want to run `ccmake` in the build directory, you can do something like this:
+```
+nnoremap <expr> <leader>cc ":tab terminal ++close ccmake " . utils#cmake#getBuildDir() . "\<CR>"
+```
+
+Or if you want to open a shell in the build directory:
+```
+nnoremap <expr> <leader>db printf(":bo new\<CR>:lcd %s\<CR>:res 15\<CR>:term ++curwin\<CR>", utils#cmake#getBuildDir() )
+```
+
+### YouCompleteMe
+
+If you're using `YouCompleteMe` and want `clangd-completer` to work with different compilers, you could pass `clangd` a `-query-driver` argument.
+
+E.g. for developing `emscripten`, you could pass `em++` to `clangd` via `g:ycm_clangd_args`.
+
+You could add such entries to your `g:cmake_kits` and override `CMakeSelectKit` and `FZFCMakeSelectKit`.
+
+Add this to the `after` directory, e.g. `~/.vim/after/plugin/cmake.vim`:
+```
+function! s:customSelectKit(name) abort
+    if !has_key( g:cmake_kits, a:name )
+        echom printf("CMake kit '%s' not found", a:name)
+        return
+    endif
+
+    call cmake4vim#SelectKit(a:name)
+
+    let l:cmake_kit = g:cmake_kits[ g:cmake_selected_kit ]
+    let g:ycm_clangd_args = filter( g:ycm_clangd_args, "v:val !~# 'query-driver'" )
+    if has_key( l:cmake_kit, 'query_driver' )
+        let g:ycm_clangd_args += [ printf( '-query-driver=%s', l:cmake_kit[ 'query_driver' ] ) ]
+        YcmRestartServer
+    endif
+endfunction
+
+function! s:FZFSelectKit() abort
+    if exists(':FZF')
+        return fzf#run({
+                    \ 'source': sort( keys( g:cmake_kits ), 'i' ),
+                    \ 'options': '+m -n 1 --prompt CMakeKit\>\ ',
+                    \ 'down':    '30%',
+                    \ 'sink':    function('s:customSelectKit')})
+    endif
+endfunction
+
+command! -nargs=1 -complete=custom,cmake4vim#CompleteKit CMakeSelectKit    call s:customSelectKit(<f-args>)
+command!                                                 FZFCMakeSelectKit call s:FZFSelectKit()
+```
 
 ## **References**
 

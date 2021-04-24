@@ -60,3 +60,6 @@ Execute (Check default initialization):
     AssertEqual g:cmake_toolchain_file, ''
     AssertEqual g:cmake_selected_kit, ''
     AssertEqual g:cmake_ctest_args, ''
+    AssertEqual g:cmake_kits, {}
+    AssertEqual g:cmake_toolchain_file, ''
+    AssertEqual g:cmake_selected_kit, ''
