@@ -235,37 +235,6 @@ Execute (Check cmake_usr_args conversion from string to dictionary to string):
         Assert new_cmake_usr_args =~# '-DMOUNT_PATH=./mount/disk15'
     endif
 
-Execute (Check cmake_usr_args conversion from string to dictionary):
-    if !has('win32')
-        let cmake_usr_args = '-DMY_CUSTOM_OP=ON -DCOMPILER_PATH=this/is/a/compiler/path -DMOUNT_PATH=./mount/disk15'
-        let split_args = utils#cmake#splitUserArgs( cmake_usr_args )
-        AssertEqual sort( items( split_args ) ), [ ['COMPILER_PATH', 'this/is/a/compiler/path'], ['MOUNT_PATH', './mount/disk15' ], ['MY_CUSTOM_OP', 'ON'] ]
-    else
-        echom 'SKIPPED'
-    endif
-
-Execute (Check cmake_usr_args conversion from dictionary to string):
-    if !has('win32')
-        let cmake_usr_args = {'MY_CUSTOM_OP' : 'ON', 'COMPILER_PATH' : 'this/is/a/compiler/path', 'MOUNT_PATH' : './mount/disk15' }
-        let joined_args = utils#cmake#joinUserArgs( cmake_usr_args )
-        Assert joined_args =~# '-DMY_CUSTOM_OP=ON'
-        Assert joined_args =~# '-DCOMPILER_PATH=this/is/a/compiler/path'
-        Assert joined_args =~# '-DMOUNT_PATH=./mount/disk15'
-    else
-        echom 'SKIPPED'
-    endif
-
-Execute (Check cmake_usr_args conversion from string to dictionary to string):
-    if !has('win32')
-        let cmake_usr_args = '-DMY_CUSTOM_OP=ON -DCOMPILER_PATH=this/is/a/compiler/path -DMOUNT_PATH=./mount/disk15'
-        let new_cmake_usr_args = utils#cmake#joinUserArgs( utils#cmake#splitUserArgs( cmake_usr_args ) )
-        Assert new_cmake_usr_args =~# '-DMY_CUSTOM_OP=ON'
-        Assert new_cmake_usr_args =~# '-DCOMPILER_PATH=this/is/a/compiler/path'
-        Assert new_cmake_usr_args =~# '-DMOUNT_PATH=./mount/disk15'
-    else
-        echom 'SKIPPED'
-    endif
-
 " Disable tests for windows because they hang for some reason ( mark2185 @ 2021-04-09 )
 Execute (Get custom build types):
     " enable tests for windows with last cmake
