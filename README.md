@@ -3,7 +3,7 @@
 [![Build Status](https://github.com/ilyachur/cmake4vim/workflows/CI/badge.svg)](#)
 [![Code style](https://img.shields.io/github/workflow/status/ilyachur/cmake4vim/code-style?&logo=github&label=vint)](#)
 [![codecov](https://codecov.io/gh/ilyachur/cmake4vim/branch/master/graph/badge.svg)](https://codecov.io/gh/ilyachur/cmake4vim)
-[![License](https://img.shields.io/badge/license-GNU_GPL_3.0-green.svg)](https://github.com/ilyachur/cmake4vim/blob/master/LICENSE)
+[![License](https://img.shields.io/badge/license-GNU_GPL_3.0-green.svg)](https://github.com/ilyachur/cmake4vim/blob/master/LICENSE) [![Join the chat at https://gitter.im/cmake4vim/Lobby](https://badges.gitter.im/cmake4vim/Lobby.svg)](https://gitter.im/cmake4vim/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 I created this plugin in order to improve integration CMake to the Vim editor. I tried different plugins for vim which allow to work with cmake but I didn't find the plugin which was satisfied my requrements.
 
@@ -60,6 +60,7 @@ The current version of the plugin supports next commands:
  - **`:CMakeSelectBuildType`** Change the cmake build type with argument passed and call **`:CMake`**.
  - **`:CMakeRun`** Run the current the binary of currently selected target. Allows to automatically change the [Vimspector](https://github.com/puremourning/vimspector) config file. **Attention! The support of Vimspector config is an experimental feature.**
  - **`:CMakeRun!`** Run the current the binary of currently selected target. Command allows to reset previous arguments if plugin reads arguments from [Vimspector](https://github.com/puremourning/vimspector) config. **Attention! The support of Vimspector config is an experimental feature.**
+ - **`:CCMake`** allow to use *ccmake* command inside vim. The command supports next open modes: 'vsplit' - vertical mode, 'hsplit' - horizontal mode, 'tab' - open ccmake in the new tab (by default the horizontal mode is used).
 
 ### **Variables**
 
@@ -141,14 +142,8 @@ create a feature request, submit a pull request or post an issue.
 
 ## **Tips and tricks**
 
-### ccmake
+### Open shell in the build directory
 
-If you want to run `ccmake` in the build directory, you can do something like this:
-```
-nnoremap <expr> <leader>cc ":tab terminal ++close ccmake " . utils#cmake#getBuildDir() . "\<CR>"
-```
-
-Or if you want to open a shell in the build directory:
 ```
 nnoremap <expr> <leader>db printf(":bo new\<CR>:lcd %s\<CR>:res 15\<CR>:term ++curwin\<CR>", utils#cmake#getBuildDir() )
 ```
