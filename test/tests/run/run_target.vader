@@ -49,7 +49,7 @@ After:
     silent call RemoveCMakeDirs()
     cd ..
 
-Execute (Should not find non-binary target):
+Execute ([CMakeRun] Should not find non-binary target):
     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
     silent CMake
     Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
@@ -57,7 +57,7 @@ Execute (Should not find non-binary target):
     let result = utils#cmake#getBinaryPath()
     AssertEqual result, ''
 
-Execute (Should not find library target):
+Execute ([CMakeRun] Should not find library target):
     if utils#cmake#verNewerOrEq([3, 14])
         Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
         silent CMake
@@ -68,7 +68,7 @@ Execute (Should not find library target):
         AssertEqual result, ''
     endif
 
-Execute (Should find binary target):
+Execute ([CMakeRun] Should find binary target):
     Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
     silent CMake
     Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
@@ -91,11 +91,11 @@ Execute (Should find binary target):
         endif
     endif
 
-Execute (Run for empty target):
+Execute ([CMakeRun] Run for empty target):
     let g:cmake_build_target=""
     silent CMakeRun
 
-Execute (Run test_app target and open quickfix):
+Execute ([CMakeRun] Run test_app target and open quickfix):
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         silent CMake
         silent CMakeSelectTarget test_app
@@ -105,19 +105,19 @@ Execute (Run test_app target and open quickfix):
         " WA to skip test
         call utils#common#executeCommand('echo F1')
     endif
-    cope
+    copen
+    let output = getqflist()
+    AssertEqual 'F1', output[0]['text']
+    AssertEqual    1, len(output)
 
-Expect (See 'F1' result in quickfix):
-  || F1
-
-Execute (Run non-binary target and open quickfix):
+Execute ([CMakeRun] Run non-binary target and open quickfix):
     silent CMake
     silent CMakeBuild
     silent CMakeSelectTarget all
     silent CMakeRun
     AssertEqual v:errmsg , 'Executable "all" was not found'
 
-Execute (Run test_app target with runtime output and open quickfix):
+Execute ([CMakeRun] Run test_app target with runtime output and open quickfix):
     if !has('win32') && utils#cmake#verNewerOrEq([3, 14])
         silent CMake -DCMAKE_RUNTIME_OUTPUT_DIRECTORY=/tmp
         silent CMakeSelectTarget test_app
@@ -127,12 +127,11 @@ Execute (Run test_app target with runtime output and open quickfix):
         " WA to skip test
         call utils#common#executeCommand('echo 123 F1')
     endif
-    cope
+    let output = getqflist()
+    AssertEqual        1, len(output)
+    AssertEqual '123 F1', output[0]['text']
 
-Expect (See '123 F1' result in quickfix):
-  || 123 F1
-
-Execute (Run test_app target with mask arguments):
+Execute ([CMakeRun] Run test_app target with mask arguments):
     if !has('win32') || utils#cmake#verNewerOrEq([3, 14])
         silent CMake
         silent CMakeSelectTarget test_app
@@ -142,7 +141,26 @@ Execute (Run test_app target with mask arguments):
         " WA to skip test
         call utils#common#executeCommand('echo --gtest_filter=Test* F1')
     endif
-    cope
+    let output = getqflist()
+    AssertEqual 1, len(output)
+    AssertEqual '--gtest_filter=Test* F1', output[0]['text']
 
-Expect (See 'F1' result in quickfix):
-  || --gtest_filter=Test* F1
+" This test fails on CI, but works locally
+" needs to be investigated when someone stumbles upon it ( @mark2185 )
+Execute ([CMakeRun] Run test_app target with mask arguments with job executor):
+    if !has('win32')
+        silent CMake
+        silent CMakeSelectTarget test_app
+        silent CMakeBuild
+        let g:cmake_build_executor='job'
+        AssertEqual bufnr('cmake4vim_execute'), -1
+        silent CMakeRun --gtest_filter=Test*
+        sleep 10
+        AssertEqual bufnr('cmake4vim_execute'), -1
+    else
+        " WA to skip test
+        call utils#common#executeCommand('echo --gtest_filter=Test* F1')
+    endif
+    let output = getqflist()
+    Assert 1 == len(output), output
+    AssertEqual '--gtest_filter=Test* F1', output[0]['text']
