@@ -34,13 +34,16 @@ function! s:createQuickFix() abort
     if s:err_fmt !=# ''
         let &errorformat = l:old_error
     endif
-    " Remove cmake4vim job
-    let s:cmake4vim_job = {}
 endfunction
 
 function! s:vimClose(channel) abort
     call s:createQuickFix()
     call s:closeBuffer()
+    if job_info(s:cmake4vim_job['job'])['exitval'] == 0
+        echom 'Success!'
+    else
+        echom 'Failure!'
+    endif
     let s:cmake4vim_job = {}
 
     silent cwindow
@@ -72,6 +75,7 @@ function! s:nVimExit(job_id, data, event) abort
 
     call s:createQuickFix()
     call s:closeBuffer()
+    let s:cmake4vim_job = {}
     if a:data != 0
         copen
     endif
@@ -115,6 +119,7 @@ function! utils#exec#job#stop() abort
     endtry
     call s:createQuickFix()
     call s:closeBuffer()
+    let s:cmake4vim_job = {}
     copen
     call utils#common#Warning('Job is cancelled!')
 endfunction
