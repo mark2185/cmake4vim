@@ -39,10 +39,12 @@ endfunction
 function! s:vimClose(channel) abort
     call s:createQuickFix()
     call s:closeBuffer()
-    if job_info(s:cmake4vim_job['job'])['exitval'] == 0
-        echom 'Success!'
-    else
-        echom 'Failure!'
+    if has_key(s:cmake4vim_job, 'job')
+        if job_info(s:cmake4vim_job['job'])['exitval'] == 0
+            call utils#common#Warning('Success!')
+        else
+            echom 'Failure!'
+        endif
     endif
     let s:cmake4vim_job = {}
 
