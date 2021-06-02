@@ -9,7 +9,6 @@ Include (Generate CMake project if script was changed):     ./tests/basic/change
 Include (Get CMake Info):                                   ./tests/basic/change_cmake_file.vader
 
 # Build test cases
-
 Include (Build CMake targets by default Generator):         ./tests/build/build_cmake_targets.vader
 Include (Build with Ninja generator):                       ./tests/build/ninja_generator.vader
 Include (Build with job):                                   ./tests/build/job.vader
