@@ -102,7 +102,7 @@ function! utils#config#vimspector#updateConfig(config) abort
 endfunction
 
 function! utils#config#vimspector#getTargetConfig(target) abort
-    let l:result = {'app': '', 'args': [g:cmake_run_target_args]}
+    let l:result = {'app': '', 'args': split(g:cmake_run_target_args))}
     if filereadable(s:getVimspectorConfig())
         let l:config = utils#config#vimspector#updateConfig({})
         if !empty(l:config)
