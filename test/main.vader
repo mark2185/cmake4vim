@@ -1,7 +1,6 @@
 # Main Vader file
 
 # Basic test cases
-
 Include (Plugin initialization):                            ./tests/basic/plugin_initialization.vader
 Include (Check CMake version detection):                    ./tests/basic/cmake_version.vader
 Include (Generate CMake project):                           ./tests/basic/generate_cmake_project.vader

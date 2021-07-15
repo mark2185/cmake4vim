@@ -236,3 +236,16 @@ Execute ([CMake Kits] Reload cmake kits):
     Assert len(keys(loaded_kits)) == 2
     Assert has_key(loaded_kits, 'randomKey')
     Assert has_key(loaded_kits, 'secondKey')
+
+Execute ([CMake Kits] Read invalid cmake-kits.json):
+    call utils#cmake#common#resetCache()
+
+    Assert !filereadable('.cmake-kits.json'), 'File already exists'
+    silent call writefile(['{"randomKey":5, error}'], '.cmake-kits.json')
+    Assert filereadable('.cmake-kits.json'), 'File was not created'
+
+    Assert empty(utils#cmake#kits#readCMakeKits( '.cmake-kits.json' )), 'Invalid json read successfully'
+
+    let g:cmake_kits = {}
+    call utils#cmake#common#resetCache()
+    Assert empty(utils#cmake#getLoadedCMakeKits()), 's:loaded_cmake_kits is not empty'
