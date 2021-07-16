@@ -10,14 +10,12 @@ After:
     silent call RemoveCMakeDirs()
 
 Execute ([CMakeRun] Should not find non-binary target):
-    if !has('win32')
-        Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
-        silent CMake
-        Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
-        silent CMakeBuild
-        let result = utils#cmake#getBinaryPath()
-        AssertEqual result, ''
-    endif
+    Assert !isdirectory("cmake-build-Release"), "Build directory shouldn't exist"
+    silent CMake
+    Assert filereadable("cmake-build-Release/CMakeCache.txt"), "CMakeCache.txt should be generated"
+    silent CMakeBuild
+    let result = utils#cmake#getBinaryPath()
+    AssertEqual result, ''
 
 Execute ([CMakeRun] Should not find library target):
     if utils#cmake#verNewerOrEq([3, 14])
